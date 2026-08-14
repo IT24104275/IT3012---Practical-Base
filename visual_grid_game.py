@@ -83,7 +83,11 @@ class VisualGridHuntGame:
             "trap_here": current_position in self.toxic_traps,
             "collision": self.collision,
             "current_direction": self.direction,
-            "blocked_directions": blocked_directions
+            "blocked_directions": blocked_directions,
+
+            "grid_size": (self.width, self.height),
+            "walls": list(self.walls),
+            "all_food": list(self.food_positions)
         }
 
     def execute_action(self, action):
@@ -376,3 +380,5 @@ class ModelBasedAgent:
 
 
         return action
+
+
