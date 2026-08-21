@@ -1,6 +1,9 @@
 from collections import deque
 import heapq
-
+import math
+from operator import pos
+import random
+import tkinter as tk
 
 class SearchAgent:
     """Search-based agent supporting BFS, DFS, and UCS."""
@@ -14,6 +17,19 @@ class SearchAgent:
 
         # Change this to BFS, DFS, or UCS
         self.active_algo = "BFS"
+
+    def manhattan_distance(self, pos, goal):
+     x1, y1 = pos
+     x2, y2 = goal
+
+     return abs(x1 - x2) + abs(y1 - y2)
+
+
+    def euclidean_distance(self, pos, goal):
+        x1, y1 = pos
+        x2, y2 = goal
+
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)   
 
     # ---------------------------------------------------------
     # Get valid neighboring cells
@@ -190,6 +206,80 @@ class SearchAgent:
 
         return []
 
+    # ---------------------------------------------------------
+    # A*
+    # ---------------------------------------------------------
+
+    def astar_search(
+        self,
+        start_pos,
+        goal_pos,
+        walls,
+        grid_size,
+        heuristic_type="manhattan"
+    ):
+
+        priority_queue = []
+        reached_states = set()
+
+        if heuristic_type == "euclidean":
+            heuristic_cost = self.euclidean_distance(start_pos, goal_pos)
+        else:
+            heuristic_cost = self.manhattan_distance(start_pos, goal_pos)
+
+        heapq.heappush(
+            priority_queue,
+            (heuristic_cost, 0, start_pos, [])
+        )
+
+        while priority_queue:
+
+            _, g_cost, current_pos, path_taken = heapq.heappop(
+                priority_queue
+            )
+
+            if current_pos == goal_pos:
+                return path_taken
+
+            if current_pos in reached_states:
+                continue
+
+            reached_states.add(current_pos)
+
+            for neighbor, action in self.get_neighbors(
+                current_pos,
+                grid_size,
+                walls
+            ):
+
+                if neighbor in reached_states:
+                    continue
+
+                new_g_cost = g_cost + 1
+
+                if heuristic_type == "euclidean":
+                    new_h_cost = self.euclidean_distance(
+                        neighbor,
+                        goal_pos
+                    )
+                else:
+                    new_h_cost = self.manhattan_distance(
+                        neighbor,
+                        goal_pos
+                    )
+
+                heapq.heappush(
+                    priority_queue,
+                    (
+                        new_g_cost + new_h_cost,
+                        new_g_cost,
+                        neighbor,
+                        path_taken + [action]
+                    )
+                )
+
+        return None
+
     
 
     def find_closest_food(
@@ -234,11 +324,20 @@ class SearchAgent:
                     walls
                 )
 
+            elif self.active_algo == "AStar":
+
+                path = self.astar_search(
+                    start,
+                    food,
+                    walls,
+                    grid_size
+                )
+
             else:
 
                 raise ValueError(
                     "Invalid algorithm. "
-                    "Use BFS, DFS, or UCS."
+                    "Use BFS, DFS, UCS, or AStar."
                 )
 
             # Ignore unreachable food
@@ -307,3 +406,12 @@ class SearchAgent:
         
 
         return "Forward"
+
+if __name__ == "__main__":
+    agent = SearchAgent()
+
+    start = (0, 0)
+    goal = (3, 4)
+
+    print("Manhattan Distance:", agent.manhattan_distance(start, goal))
+    print("Euclidean Distance:", agent.euclidean_distance(start, goal))
