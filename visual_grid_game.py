@@ -1,6 +1,7 @@
 import random
 import tkinter as tk
-
+import math
+from agent import SearchAgent
 
 class VisualGridHuntGame:
     """Pacman-style grid environment with partial observability."""
@@ -78,6 +79,7 @@ class VisualGridHuntGame:
         wall_ahead = self.direction in blocked_directions
 
         return {
+            "agent_pos": list(self.agent_pos),
             "wall_ahead": wall_ahead,
             "food_here": current_position in self.food_positions,
             "trap_here": current_position in self.toxic_traps,
@@ -189,7 +191,8 @@ class GridGameGUI:
             custom_walls=walls
         )
 
-        self.agent = SimpleReflexAgent()
+        self.agent = SearchAgent()
+        self.agent.active_algo = "AStar"
         self.cell_size = 50
 
         self.canvas = tk.Canvas(
