@@ -1,6 +1,8 @@
 import random
 import tkinter as tk
 
+from agent import SearchAgent
+
 
 class VisualGridHuntGame:
     """Pacman-style grid environment with partial observability."""
@@ -173,7 +175,7 @@ class VisualGridHuntGame:
     def is_done(self):
         return (
             len(self.food_positions) == 0
-            or self.steps >= 60
+            or self.steps >= 300
             or self.collision
         )
 
@@ -370,7 +372,10 @@ class GridGameGUI:
             custom_walls=walls
         )
 
-        if agent_type == "model":
+        if agent_type == "search":
+            self.agent = SearchAgent()
+            self.agent_name = "Search Agent"
+        elif agent_type == "model":
             self.agent = ModelBasedAgent()
             self.agent_name = "Model-Based Agent"
         else:
@@ -571,7 +576,7 @@ if __name__ == "__main__":
         height=12,
         num_food=15,
         num_opponents=0,
-        agent_type="simple"
+        agent_type="search"
     )
 
     root.mainloop()
