@@ -511,6 +511,8 @@ class SearchAgent:
                 percept["walls"]
             )
 
+            walls.update(percept.get("toxic_traps", []))
+
             food_positions = set(
                 percept["all_food"]
             )
@@ -532,8 +534,16 @@ class SearchAgent:
         # Execute next planned action
         if self.plan:
 
-            action = self.plan.pop(0)
+            action = self.plan[0]
 
+            if "current_direction" in percept:
+                if percept["current_direction"] != action:
+                    return action
+
+                self.plan.pop(0)
+                return "Forward"
+
+            self.plan.pop(0)
             return action
 
         return "Forward"
